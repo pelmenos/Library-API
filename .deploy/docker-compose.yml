@@ -1,0 +1,56 @@
+services:
+  backend:
+    build:
+      context: ../backend
+    container_name: backend
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    restart: always
+    expose:
+      - 8000
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/mediafiles
+    env_file:
+      - ../backend/.env
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: postgres:18-alpine
+    container_name: library-db
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ../backend/.env
+    environment:
+      POSTGRES_DB: '${DB_NAME:-library}'
+      POSTGRES_USER: '${DB_USER:-postgres}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-QWEasd123}'
+    networks:
+      - app-network
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/mediafiles
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  app-network:

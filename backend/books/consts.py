@@ -1,0 +1,1 @@
+FINE_PER_DAY = 150
