@@ -23,12 +23,10 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    env_file:
-      - ../backend/.env
     environment:
-      POSTGRES_DB: '${DB_NAME:-library}'
-      POSTGRES_USER: '${DB_USER:-postgres}'
-      POSTGRES_PASSWORD: '${DB_PASSWORD:-QWEasd123}'
+      POSTGRES_DB: ${DB_NAME?Variable not set}
+      POSTGRES_USER: ${DB_USER?Variable not set}
+      POSTGRES_PASSWORD: ${DB_PASSWORD?Variable not set}
     networks:
       - app-network
 
