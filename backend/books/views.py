@@ -1,11 +1,10 @@
 from django.utils import timezone
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, UpdateAPIView, ListAPIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 
 from books.choices import StatusChoices
 from books.models import Book, Genre, Author, Publisher, BookLoan, Review, Fine
-from books.permissions import IsAdminOrReadOnly
 from books.serializers import BookSerializer, GenreSerializer, AuthorSerializer, PublisherSerializer, \
     BookLoanSerializer, ReviewSerializer, FineUpdateSerializer, FineListSerializer
 
@@ -13,31 +12,31 @@ from books.serializers import BookSerializer, GenreSerializer, AuthorSerializer,
 class BookViewSet(ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminUser,)
 
 
 class GenreViewSet(ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminUser,)
 
 
 class AuthorViewSet(ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminUser,)
 
 
 class PublisherViewSet(ModelViewSet):
     queryset = Publisher.objects.all()
     serializer_class = PublisherSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminUser,)
 
 
 class ReviewViewSet(ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
 
     def perform_create(self, serializer):
         serializer.save(reader=self.request.user)
@@ -45,7 +44,7 @@ class ReviewViewSet(ModelViewSet):
 
 class BookLoanListView(ListCreateAPIView):
     serializer_class = BookLoanSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminUser,)
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -57,7 +56,7 @@ class BookLoanListView(ListCreateAPIView):
 class BookLoanDetailView(RetrieveUpdateAPIView):
     queryset = BookLoan.objects.all()
     serializer_class = BookLoanSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminUser,)
 
     def perform_update(self, serializer: BookLoanSerializer):
         if serializer.validated_data['status'] == StatusChoices.RETURNED.value:
@@ -66,13 +65,8 @@ class BookLoanDetailView(RetrieveUpdateAPIView):
 
 class FineListView(ListAPIView):
     serializer_class = FineListSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        if not self.request.user.is_staff:
-            return Fine.objects.filter(loan__reader_id=self.request.user.id)
-
-        return Fine.objects.all()
+    permission_classes = (IsAdminUser,)
+    queryset = Fine.objects.all()
 
 
 class FineUpdateView(UpdateAPIView):
