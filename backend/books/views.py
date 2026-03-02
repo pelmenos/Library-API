@@ -38,9 +38,6 @@ class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminUser,)
 
-    def perform_create(self, serializer):
-        serializer.save(reader=self.request.user)
-
 
 class BookLoanListView(ListCreateAPIView):
     serializer_class = BookLoanSerializer
